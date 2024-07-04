@@ -18,11 +18,12 @@ Sources:
 git clone git@github.com:clausqr/ros2-vscode-container-dev.git my_project_name
 ```
 
-2. Break the link to this repo
+2. Break the link to this repo and get rid of the images of `readme.MD`.
 ```bash
 cd my_project_name
 rm -rf .git && git init
 rm readme.MD && touch readme.MD
+rm img/*.png
 ```
 ### Alternative 2: 
 
