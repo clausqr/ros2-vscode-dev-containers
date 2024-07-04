@@ -106,3 +106,4 @@ bash join.bash [--name instance_name]
 - [x] Allow multiple instances.
 - [ ] Check/automate GPU handling.
 - [ ] Check/automate/allow mounting devices (i.e. `/dev/ttyUSB0`).
+- [ ] Integration with github codespaces (get rid of mounts for X11 and GPUs).
