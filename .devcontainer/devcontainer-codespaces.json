@@ -1,5 +1,5 @@
 {
-    "name": "ROS 2 Development Container",
+    "name": "ROS 2 Development Container in Codespaces",
     "privileged": true,
     "remoteUser": "user",
     "build": 

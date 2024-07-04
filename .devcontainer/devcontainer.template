@@ -1,0 +1,44 @@
+{
+    "name": "ROS 2 Development Container",
+    "privileged": true,
+    "remoteUser": "${templateOption:containerUser}",
+    "build": 
+    {
+        "dockerfile": "../Dockerfile",
+        "args": {
+            "USER_UID": "${templateOption:containerUid}",
+            "USER_GID": "${templateOption:containerGid}",
+            "USERNAME": "${templateOption:containerUser}"
+        }
+    },
+    "workspaceFolder": "/ros2_ws",
+    "workspaceMount": "source=${localWorkspaceFolder}/ros2_ws,target=/ros2_ws,type=bind",
+    "customizations": {
+        "vscode": {
+            "extensions":[
+                "ms-vscode.cpptools",
+                "ms-vscode.cpptools-themes", 
+                "twxs.cmake",
+                "donjayamanne.python-extension-pack",
+                "eamodio.gitlens",
+                "ms-iot.vscode-ros"
+            ]
+        }
+    },
+    "containerEnv": {
+        "DISPLAY": "unix:0",
+        "ROS_AUTOMATIC_DISCOVERY_RANGE": "LOCALHOST",
+        "ROS_DOMAIN_ID": "42",
+        
+    },
+    "runArgs": [
+        "--gpus=all",
+        "--net=host",
+        "-e", "DISPLAY=${env:DISPLAY}"
+    ],
+    "mounts": [
+       "source=/tmp/.X11-unix,target=/tmp/.X11-unix,type=bind,consistency=cached",
+        "source=/dev/dri,target=/dev/dri,type=bind,consistency=cached"
+    ],
+    "postCreateCommand": "sudo rosdep update && sudo rosdep install --from-paths src --ignore-src -y && sudo chown -R $(whoami) /ros2_ws"
+}
