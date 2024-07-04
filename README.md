@@ -101,4 +101,7 @@ bash join.bash [--name instance_name]
 
 ## To Do and WIP:
 
-WIP
+- [x] Squash previous WIP items.
+- [x] Offload config to separate `setup.env` file.
+- [x] Allow multiple instances.
+- [ ] Check/automate GPU handling. 
