@@ -12,7 +12,7 @@
         }
     },
     "workspaceFolder": "/ros2_ws",
-    "workspaceMount": "source=${localWorkspaceFolder},target=/ros2_ws/src,type=bind",
+    "workspaceMount": "source=${localWorkspaceFolder}/ros2_ws,target=/ros2_ws,type=bind",
     "customizations": {
         "vscode": {
             "extensions":[
