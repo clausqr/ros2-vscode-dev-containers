@@ -104,4 +104,5 @@ bash join.bash [--name instance_name]
 - [x] Squash previous WIP items.
 - [x] Offload config to separate `setup.env` file.
 - [x] Allow multiple instances.
-- [ ] Check/automate GPU handling. 
+- [ ] Check/automate GPU handling.
+- [ ] Check/automate/allow mounting devices (i.e. `/dev/ttyUSB0`).
