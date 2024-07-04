@@ -1,7 +1,13 @@
-# ROS 2 + VS Code + docker using https://containers.dev/
+# ROS 2 + VS Code + docker using Dev Containers
 
-Following https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
-and https://containers.dev/guides
+A ready to use template repository for setting up ROS 2 with VS Code and Docker using Dev Containers, allowing for easy development without the need to install ROS 2 or any other tools on the host machine, but using all your favorite tools and extensions!
+
+Sources:
+1. https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
+2. https://containers.dev/guides
+3. https://code.visualstudio.com/docs/devcontainers/containers
+
+![https://code.visualstudio.com/docs/devcontainers/containers](img/dev-containers-vscode.png)
 
 ## Getting Started
 
@@ -92,4 +98,6 @@ bash join.bash [--name instance_name]
 ```
 
 
-##
+## To Do and WIP:
+
+WIP
