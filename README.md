@@ -37,16 +37,28 @@ and select "Create new repository" and fill in the details and start working on 
 ## Setting up Container Dev
 
 1. Open the project folder in VS Code.
-1. Install the Remote - Containers extension.
-2. Customize `Dockerfile` according to your project needs
-3. Customize `.devcontainers/devcontainer.json` according to your needs. A template is also available.
-4. Build the container searching for "build container" in the command palette.
-4. Alternatively, reopen the project in a container.
-![reopen-in-container](img/reopen-in-container.png)
-1. Inside the container, open a terminal and you will be in the `/ros2_ws` folder, which is mapped to the local `./ros2_ws` folder.
-2. Start developing. A default `.gitignore` file is in place to ignore build artifacts and logs, which stay inside the container.
-3. From there on you can develop for ROS2 without installing ROS2 or any other tool on the host:
+2. Install the Remote - Containers extension.
+3. Customize `Dockerfile` according to your project needs
+4. Run the `create_devcontainer.bash` script to tailor the template to your uid and gid, and also username and custom image name.
+  
 ```bash
+bash create_devcontainer.bash -h
+Usage: create_devcontainer.bash [option...] {--username|-u} {--user-uid|-i} {--user-gid|-g} {--image-name|-n}
+
+   -u, --username       Username to replace in the JSON template
+   -i, --user-uid       User UID to replace in the JSON template
+   -g, --user-gid       User GID to replace in the JSON template
+   -n, --image-name     Image name to replace in the JSON template
+
+If no command line arguments are provided, the values from setup.env will be used.
+```
+
+5. Build the container searching for "build container" in the command palette.
+6. Alternatively, reopen the project in a container.
+![reopen-in-container](img/reopen-in-container.png)
+7. Inside the container, open a terminal and you will be in the `/ros2_ws` folder, which is mapped to the local `./ros2_ws` folder.
+8. Start developing. A default `.gitignore` file is in place to ignore build artifacts and logs, which stay inside the container.
+9. From there on you can develop for ROS2 without installing ROS2 or any other tool on the host:
 
 user@host:/ros2_ws/src$ ros2
 usage: ros2 [-h] [--use-python-default-buffering] Call `ros2 <command> -h` for more detailed usage. ...
