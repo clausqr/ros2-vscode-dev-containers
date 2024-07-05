@@ -2,6 +2,8 @@
 
 A ready to use template repository for setting up ROS 2 with VS Code and Docker using Dev Containers, allowing for easy development without the need to install ROS 2 or any other tools on the host machine, but using all your favorite tools and extensions (and also GUI apps inside container!)!
 
+version: 0.1.0
+
 Sources:
 1. https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
 2. https://containers.dev/guides
