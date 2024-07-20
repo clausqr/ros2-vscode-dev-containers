@@ -2,13 +2,13 @@
 source setup.env
 
 # Default value
-default_instance_name=$IMAGE_NAME
+default_container_name=$IMAGE_NAME
 
-# Parse command line arguments
+# Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --name)
-            instance_name="$2"
+            container_name="$2"
             shift 2
             ;;
         *)
@@ -19,8 +19,8 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Use the default value if no --name argument was passed
-instance_name="${instance_name:-$default_instance_name}"
+container_name="${container_name:-$default_container_name}"
 
-echo "Joining running container $instance_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
+echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
 
-docker exec -it $instance_name bash
+docker exec -it $container_name bash
