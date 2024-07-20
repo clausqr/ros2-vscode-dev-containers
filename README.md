@@ -103,11 +103,11 @@ bash build.bash
 ```
 2. `run.bash` will run it mounting the local `./ros2_ws` folder to `/ros2_ws`, and it will also give you GUI pass through to your host. Run it as
 ```bash
-bash run.bash [--name INSTANCE_NAME]
+bash run.bash [--name CONTAINER_NAME]
 ```
 3. You can also open a new bash session in a running container using `join.bash`
 ```bash
-bash join.bash [--name instance_name]
+bash join.bash [--name CONTAINER_NAME]
 ```
 
 
@@ -116,6 +116,6 @@ bash join.bash [--name instance_name]
 - [x] Squash previous WIP items.
 - [x] Offload config to separate `setup.env` file.
 - [x] Allow multiple instances.
-- [ ] Check/automate GPU handling.
+- [x] Check/automate GPU handling.
 - [ ] Check/automate/allow mounting devices (i.e. `/dev/ttyUSB0`).
 - [ ] Integration with github codespaces (get rid of mounts for X11 and GPUs).
