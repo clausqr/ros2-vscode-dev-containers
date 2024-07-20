@@ -22,9 +22,10 @@ git clone git@github.com:clausqr/ros2-vscode-container-dev.git my_project_name
 ```bash
 cd my_project_name
 rm -rf .git && git init
-rm readme.MD && touch readme.MD
+rm README.md && touch README.md
 rm img/*.png
 ```
+
 ### Alternative 2: 
 
 Alternatively, if you are using github, you can select "Use this template"
@@ -32,7 +33,13 @@ Alternatively, if you are using github, you can select "Use this template"
 ![github-template-button](img/github-template.png)
 
 and select "Create new repository" and fill in the details and start working on your new repo.
-
+Then after cloning your new repo you only need to get rid of this readme and its imgs:
+```bash
+git clone <your_new_repo_url> my_project_name
+cd my_project_name
+rm README.md && touch README.md
+rm img/*.png
+```
 
 ## Setting up Container Dev
 
