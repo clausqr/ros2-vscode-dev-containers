@@ -25,5 +25,5 @@ ENV SHELL /bin/bash
 
 RUN echo source /opt/ros/humble/setup.bash >> /home/$USERNAME/.bashrc
 USER $USERNAME
-WORKDIR /ros2_ws/src
+WORKDIR /ros2_ws
 CMD ["/bin/bash"]
