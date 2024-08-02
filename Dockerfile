@@ -23,7 +23,7 @@ RUN apt-get install -y python3-pip
 
 RUN apt update && apt install -y inetutils-tools net-tools
 
-ENV SHELL /bin/bash
+ENV SHELL=/bin/bash
 
 RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
 USER ${USERNAME}
