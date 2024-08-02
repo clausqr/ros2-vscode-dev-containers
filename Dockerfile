@@ -10,9 +10,9 @@ RUN echo "Building..."
 RUN echo "+ USERNAME=${USERNAME}" 
 RUN echo "+ USER_UID=${USER_UID}"
 RUN echo "+ USER_GID=${USER_GID}"
-# Create the user
-RUN groupadd --gid ${USER_GID} ${USERNAME} \
-    && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME}
+# Create the user if not default UID GID 1000
+RUN if ! getent group ${USER_GID}; then groupadd --gid ${USER_GID} ${USERNAME} \
+    && useradd --uid ${USER_GID} --gid ${USER_GID} -m ${USERNAME}; fi 
 RUN apt-get update \
     && apt-get install -y sudo \
     && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
