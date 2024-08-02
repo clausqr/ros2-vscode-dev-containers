@@ -25,7 +25,7 @@ RUN apt update && apt install -y inetutils-tools net-tools
 
 ENV SHELL /bin/bash
 
-RUN echo source /opt/ros/humble/setup.bash >> /home/${USERNAME}/.bashrc
+RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> /home/${USERNAME}/.bashrc
 USER ${USERNAME}
 WORKDIR /ros2_ws
 CMD ["/bin/bash"]
