@@ -9,6 +9,7 @@ Sources:
 
 ![https://code.visualstudio.com/docs/devcontainers/containers](img/dev-containers-vscode.png)
 
+Default ROS distribution is Jazzy, but you can change it in the `setup.env` file.
 ## Getting Started
 
 ### Alternative 1: Manual clone and fresh start
