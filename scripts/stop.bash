@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-# Stop a running container with the given name as --name NAME parameter. Default is the IMAGE_NAME from setup.env
+# 
+# DESCRIPTION:
+#   If the container is running, it stops it.
+#
+# USAGE:
+#   To use this script, run:
+#     rr stop [--name <container_name>]
+#
+# OPTIONS:
+#       --name:  The name of the container to stop. If not provided, the default
+#                container name from setup.env will be used.
+
+
+
 
 source setup.env
 

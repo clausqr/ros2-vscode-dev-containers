@@ -1,5 +1,18 @@
 #!/usr/bin/env bash
-# Run a docker container with the given username, user id, and group id as given in the setup.env file
+#
+# DESCRIPTION:
+# This script runs a Docker container with specific configurations defined in 
+# the setup.env file. It checks for necessary arguments and allows optional 
+# customization of the container name.
+#
+# USAGE:
+# To run the script, execute:
+#     rr run [--name <container_name>]
+#
+# OPTIONS:
+# --name <container_name>  Specify a custom name for the Docker container. If not
+#                          provided, a default name from the setup.env file is used.
+# --help                   Display usage information and exit.
 
 source setup.env
 

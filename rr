@@ -1,5 +1,18 @@
 #!/bin/bash
 
+show_help() {
+    echo "Usage: rr <script_name> [args]"
+    echo "Execute a script from the scripts directory."
+    echo "Available scripts:"
+    echo "------------------"
+    echo
+    for script in $(ls ./scripts/*.bash); do
+        # print script name without the .bash extension
+        echo "rr $(basename $script .bash)"
+        sed -n '2,/^$/p' "$script" | sed 's/^#//'
+    done
+}
+
 # Combine the parameter with the .bash extension
 script_name="./scripts/$1.bash"
 shift
@@ -9,5 +22,7 @@ if [ -f "$script_name" ]; then
     # Execute the script with the remaining arguments
     (cd $(pwd) && bash "$script_name" "$@")
 else
-    echo "Script '$script_name' not found."
+    echo "Script not found: $script_name"
+    show_help
 fi
+

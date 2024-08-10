@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
-# Kill a running container with the given name as --name NAME parameter. Default is the IMAGE_NAME from setup.env
+#
+# DESCRIPTION:
+#   If the container is running, it kills it. 
+#
+# USAGE:
+# To use this script, run:
+#     bash kill.bash
+#
 
+# Load the variables from setup.env
 source setup.env
 
 # Default value
