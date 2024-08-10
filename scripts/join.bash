@@ -13,7 +13,7 @@ while [[ "$#" -gt 0 ]]; do
             container_name="$2"
             shift 2
             ;;
-        --help
+        --help)
             echo "Usage: $0 [--name <container_name>]"
             exit 0
             ;;
