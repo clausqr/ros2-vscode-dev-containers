@@ -106,7 +106,7 @@ If you are running multiple instances, you can run each with a custom `instance_
 
 
 
-1. `build` - Build the Docker image.
+#### 1. `build` - Build the Docker image.
 ```bash
 ./rr build
 ```
@@ -114,14 +114,14 @@ If you are running multiple instances, you can run each with a custom `instance_
 Build a Docker image with the username, user ID, group ID, image name, and ROS distro specified in the setup.env file.
 
 
-2. `cleanup` - Clean up the `ros2_ws` artifacts.
+#### 2. `cleanup` - Clean up the `ros2_ws` artifacts.
 ```bash
 ./rr cleanup
 ```
 Clean up the ros2_ws artifacts, specifically the build, install, and log directories.
 
 
-3. `create_devcontainer` - Create a devcontainer.json file.
+#### 3. `create_devcontainer` - Create a devcontainer.json file.
 ```bash
 ./rr create_devcontainer
 ```
@@ -139,7 +139,7 @@ Options:
 - `--name <container_name>`: Specify the container name to join. If not provided, the default container name from setup.env is used.
 - 
 
-5. `kill` - Kill the running container.
+#### 5. `kill` - Kill the running container.
 
 Description: If the container is running, this script will kill it.
 Usage:
@@ -152,7 +152,7 @@ Options:
 - `--name <container_name>`: Specify the container name to kill. If not provided, the default container name from setup.env is used.
 
 
-6. `run` - Run a Docker container.
+#### 6. `run` - Run a Docker container.
 
 Description:
 Run a Docker container with configurations defined in setup.env. This script checks for necessary arguments and allows optional customization of the container name.
@@ -168,7 +168,7 @@ Options:
 - `--help`: Display usage information and exit.
 
 
-7. `stop` - Stop a running container.
+#### 7. `stop` - Stop a running container.
 
 Description:
 Stop a running container with the specified name.
