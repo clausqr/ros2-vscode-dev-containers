@@ -5,6 +5,7 @@ A ready to use template repository for setting up ROS 2 with VS Code and Docker 
 version: 0.1.0
 
 Sources:
+
 1. https://docs.ros.org/en/iron/How-To-Guides/Setup-ROS-2-with-VSCode-and-Docker-Container.html
 2. https://containers.dev/guides
 3. https://code.visualstudio.com/docs/devcontainers/containers
@@ -15,26 +16,28 @@ Sources:
 
 ### Alternative 1: Manual clone and fresh *start*
 
-1. Clone this repository to your local machine and change the name to your desired project name.
+1. Clone this repository to your local machine and change the name to your desired project name
+
 ```bash
 git clone git@github.com:clausqr/ros2-vscode-container-dev.git my_project_name
 ```
 
-2. Break the link to this repo and get rid of the images of `readme.MD`.
+1. Break the link to this repo and get rid of the images of `readme.MD`
+
 ```bash
 cd my_project_name
 rm -rf .git && git init
 rm readme.MD && touch readme.MD
 rm img/*.png
 ```
-### Alternative 2: 
+
+### Alternative 2:
 
 Alternatively, if you are using github, you can select "Use this template"
 
 ![github-template-button](img/github-template.png)
 
 and select "Create new repository" and fill in the details and start working on your new repo.
-
 
 ## Setting up Container Dev
 
@@ -106,40 +109,42 @@ If you are running multiple instances, you can run each with a custom `instance_
 
 
 
-#### 1. `build` - Build the Docker image.
+#### 1. `build` - Build the Docker image
+
 ```bash
 ./rr build
 ```
 
 Build a Docker image with the username, user ID, group ID, image name, and ROS distro specified in the setup.env file.
 
+#### 2. `cleanup` - Clean up the `ros2_ws` artifacts
 
-#### 2. `cleanup` - Clean up the `ros2_ws` artifacts.
 ```bash
 ./rr cleanup
 ```
+
 Clean up the ros2_ws artifacts, specifically the build, install, and log directories.
 
+#### 3. `create_devcontainer` - Create a devcontainer.json file
 
-#### 3. `create_devcontainer` - Create a devcontainer.json file.
 ```bash
 ./rr create_devcontainer
 ```
 
 Create a devcontainer.json file from the devcontainer-template.json template by replacing placeholders with values from setup.env.
 
-4. `join` - Join a running in the container.
-   
+#### 4. `join` - Join a running in the container
+
 ```bash
 ./rr join [--name <container_name>]
 ```
+
 Join a running container using the specified container name, username, user ID, and group ID from setup.env.
 
 Options:
 - `--name <container_name>`: Specify the container name to join. If not provided, the default container name from setup.env is used.
-- 
 
-#### 5. `kill` - Kill the running container.
+#### 5. `kill` - Kill the running container
 
 Description: If the container is running, this script will kill it.
 Usage:
@@ -149,16 +154,16 @@ Usage:
 ```
 
 Options:
+
 - `--name <container_name>`: Specify the container name to kill. If not provided, the default container name from setup.env is used.
 
-
-#### 6. `run` - Run a Docker container.
+#### 6. `run` - Run a Docker container
 
 Description:
 Run a Docker container with configurations defined in setup.env. This script checks for necessary arguments and allows optional customization of the container name.
 Usage:
 
-```
+```bash
 rr run [--name <container_name>]
 ```
 
@@ -167,8 +172,7 @@ Options:
 - `--name <container_name>`: Specify a custom name for the Docker container. If not provided, a default name from setup.env is used.
 - `--help`: Display usage information and exit.
 
-
-#### 7. `stop` - Stop a running container.
+#### 7. `stop` - Stop a running container
 
 Description:
 Stop a running container with the specified name.
@@ -182,9 +186,7 @@ Options:
 
 - `--name <container_name>`: Specify the container name to stop. If not provided, the default container name from setup.env is used.
 
-
-
-## To Do and WIP:
+## To Do and WIP
 
 - [x] Squash previous WIP items.
 - [x] Offload config to separate `setup.env` file.
