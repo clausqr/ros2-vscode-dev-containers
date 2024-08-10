@@ -2,13 +2,13 @@
 source setup.env
 
 # Default value
-default_instance_name=$IMAGE_NAME
+default_container_name=$IMAGE_NAME
 
-# Parse command line arguments
+# Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
     case $1 in
         --name)
-            instance_name="$2"
+            container_name="$2"
             shift 2
             ;;
         *)
@@ -19,21 +19,21 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Use the default value if no --name argument was passed
-instance_name="${instance_name:-$default_instance_name}"
+container_name="${container_name:-$default_container_name}"
 
 echo "Running image $IMAGE_NAME using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
-echo "Container will be named $instance_name"
+echo "Container will be named $container_name"
 echo 
 
 docker run -it \
    --rm \
-   --gpus=all \
    --net=host \
+   $(which nvidia-smi &> /dev/null && echo --gpus=all) \
    --user $USER_UID:$USER_GID \
    -e DISPLAY=$DISPLAY \
    -v /tmp/.X11-unix:/tmp/.X11-unix \
    -v /dev/dri:/dev/dri \
    -v /dev/shm:/dev/shm \
    -v $(pwd)/ros2_ws:/ros2_ws \
-   --name $instance_name \
+   --name $container_name \
    $IMAGE_NAME
