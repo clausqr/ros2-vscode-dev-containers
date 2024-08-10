@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Kill a running container with the given name as --name NAME parameter. Default is the IMAGE_NAME from setup.env
+
 source setup.env
 
 # Default value
@@ -11,6 +13,10 @@ while [[ "$#" -gt 0 ]]; do
             container_name="$2"
             shift 2
             ;;
+        --help)
+            echo "Usage: $0 [--name <container_name>]"
+            exit 0
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1
@@ -21,19 +27,7 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Running image $IMAGE_NAME using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
-echo "Container will be named $container_name"
-echo 
+echo "Killing ${container_name}...
 
-docker run -it \
-   --rm \
-   --net=host \
-   $(which nvidia-smi &> /dev/null && echo --gpus=all) \
-   --user $USER_UID:$USER_GID \
-   -e DISPLAY=$DISPLAY \
-   -v /tmp/.X11-unix:/tmp/.X11-unix \
-   -v /dev/dri:/dev/dri \
-   -v /dev/shm:/dev/shm \
-   -v $(pwd)/ros2_ws:/ros2_ws \
-   --name $container_name \
-   $IMAGE_NAME
+docker kill ${container_name}
+echo "${container_name} killed OK"

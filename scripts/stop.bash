@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Stop a running container with the given name as --name NAME parameter. Default is the IMAGE_NAME from setup.env
+
 source setup.env
 
 # Default value
@@ -11,6 +13,10 @@ while [[ "$#" -gt 0 ]]; do
             container_name="$2"
             shift 2
             ;;
+        --help)
+            echo "Usage: $0 [--name <container_name>]"
+            exit 0
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1
@@ -21,6 +27,7 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
+echo "Stopping ${container_name}...
 
-docker exec -it $container_name bash --login
+docker stop ${container_name}
+echo "${container_name} stopped OK"

@@ -1,4 +1,5 @@
 #!/bin/bash
+# Create a devcontainer.json file from the devcontainer-template.json file by replacing the placeholders with the values from setup.env
 
 # Function to display help
 display_help() {

@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Join a running container with the given name using the username, user id, and group id as given in the setup.env file
+
 source setup.env
 
 # Default value
@@ -11,6 +13,10 @@ while [[ "$#" -gt 0 ]]; do
             container_name="$2"
             shift 2
             ;;
+        --help
+            echo "Usage: $0 [--name <container_name>]"
+            exit 0
+            ;;
         *)
             echo "Unknown parameter passed: $1"
             exit 1
@@ -21,7 +27,6 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Killing ${container_name}...
+echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
 
-docker kill ${container_name}
-echo "${container_name} killed OK"
+docker exec -it $container_name bash --login

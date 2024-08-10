@@ -13,7 +13,7 @@ Sources:
 
 ## Getting Started
 
-### Alternative 1: Manual clone and fresh start
+### Alternative 1: Manual clone and fresh *start*
 
 1. Clone this repository to your local machine and change the name to your desired project name.
 ```bash

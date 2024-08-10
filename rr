@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Combine the parameter with the .bash extension
+script_name="./scripts/$1.bash"
+shift
+
+# Check if the script exists
+if [ -f "$script_name" ]; then
+    # Execute the script with the remaining arguments
+    (cd $(pwd) && bash "$script_name" "$@")
+else
+    echo "Script '$script_name' not found."
+fi
