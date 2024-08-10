@@ -1,9 +1,13 @@
 ARG ROS_DISTRO=jazzy
 FROM osrf/ros:${ROS_DISTRO}-desktop
 ARG ROS_DISTRO
+ARG ROS_DISTRO=jazzy
+FROM osrf/ros:${ROS_DISTRO}-desktop
+ARG ROS_DISTRO
 ARG USERNAME=USERNAME
 ARG USER_UID=USER_UID
 ARG USER_GID=USER_GID
+ARG IMAGE_NAME=IMAGE_NAME
 ARG IMAGE_NAME=IMAGE_NAME
 
 RUN echo "Building..."
@@ -11,36 +15,58 @@ RUN echo "+ USERNAME=${USERNAME}"
 RUN echo "+ USER_UID=${USER_UID}"
 RUN echo "+ USER_GID=${USER_GID}"
 
-# the following is to allow full compatibility with the host system's file permissions:
-# Remove existing user with the same UID if it exists
-RUN if id -u ${USER_UID} >/dev/null 2>&1; then \
-        existing_user=$(getent passwd ${USER_UID} | cut -d: -f1); \
-        userdel -r ${existing_user}; \
+
+# # # # # # # # # # # # # # # # # # # #
+# Create the user with same GID and UID as the host:
+# # # # # # # # # # #  # # # # # # # # 
+# Change the primary group of any user using the group to be deleted
+RUN if getent group ${USER_GID}; then \
+    for user in $(getent passwd | awk -F: -v gid=${USER_GID} '$4 == gid {print $1}'); do \
+    usermod -g users $user; \
+    done; \
     fi
 
-# Create the user and group
-RUN if ! getent group ${USER_GID}; then \
-        groupadd --gid ${USER_GID} ${USERNAME}; \
-    fi \
-    && useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME};
+# Delete existing user if it exists
+RUN if getent passwd ${USER_UID}; then \
+    userdel -r $(getent passwd ${USER_UID} | cut -d: -f1); \
+    fi
 
+# Delete existing group if it exists
+RUN if getent group ${USER_GID}; then \
+    groupdel $(getent group ${USER_GID} | cut -d: -f1); \
+    fi
 
-RUN apt-get update \
-    && apt-get install -y sudo \
-    && echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
-    && chmod 0440 /etc/sudoers.d/${USERNAME}
-    
+# Create the group with the specified GID
+RUN groupadd -g ${USER_GID} ${USERNAME}
+
+# Create the user with the specified UID and add to the sudo group
+RUN useradd -m -u ${USER_UID} -g ${USER_GID} -s /bin/bash ${USERNAME} \
+    && usermod -aG sudo ${USERNAME} \
+    && echo "${USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# # # # # # # # # # # # # # # # # # # # # 
+
+# Python install
 RUN apt-get update && apt-get upgrade -y
 RUN apt-get install -y python3-pip
 
-RUN apt update && apt install -y inetutils-tools net-tools
+RUN apt update && apt install -y inetutils-tools net-tools ssh
+
+# Set up the ROS 2 repository and install the packages listed in included ros2_packages.txt
+COPY ros2_packages.txt /tmp/ros2_packages.txt
+RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - \
+    && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list' \
+    && apt-get update \
+    && xargs -a /tmp/ros2_packages.txt apt-get install -y \
+    && rm -rf /var/lib/apt/lists/*
+
 
 ENV SHELL=/bin/bash
-# RUN echo "HOME=${HOME}"
-RUN cat /etc/passwd
 
+# Set up the ROS 2 environment
 USER ${USERNAME}
+RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
+RUN echo source /ros2_ws/install/setup.bash >> ${HOME}/.bashrc
 
-RUN bash -c "echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ~/.bashrc"
 WORKDIR /ros2_ws
+
 CMD ["/bin/bash"]
