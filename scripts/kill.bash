@@ -35,7 +35,8 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Killing ${container_name}...
+echo "Killing ${container_name}..."
 
 docker kill ${container_name}
 echo "${container_name} killed OK"
+

@@ -1,9 +1,12 @@
-ARG ROS_DISTRO=jazzy
+ARG ROS_DISTRO=none
 FROM osrf/ros:${ROS_DISTRO}-desktop
-ARG ROS_DISTRO
+ARG ROS_DISTRO=none
+FROM osrf/ros:${ROS_DISTRO}-desktop
+ARG ROS_DISTRO=none
 ARG USERNAME=USERNAME
 ARG USER_UID=USER_UID
 ARG USER_GID=USER_GID
+ARG IMAGE_NAME=IMAGE_NAME
 ARG IMAGE_NAME=IMAGE_NAME
 
 RUN echo "Building..."
@@ -52,7 +55,7 @@ COPY ros2_packages.txt /tmp/ros2_packages.txt
 RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - \
     && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list' \
     && apt-get update \
-    && xargs -a /tmp/ros2_packages.txt apt-get install -y \
+    &&xargs -a /tmp/ros2_packages.txt -I {} bash -c "apt-get install -y \$(echo {} | sed 's/\${ROS_DISTRO}/$ROS_DISTRO/g')" \
     && rm -rf /var/lib/apt/lists/*
 
 
@@ -61,7 +64,6 @@ ENV SHELL=/bin/bash
 # Set up the ROS 2 environment
 USER ${USERNAME}
 RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
-RUN echo source /ros2_ws/install/setup.bash >> ${HOME}/.bashrc
 
 WORKDIR /ros2_ws
 
