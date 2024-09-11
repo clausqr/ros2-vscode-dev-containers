@@ -27,6 +27,12 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
+# Wait until the container is up
+while [[ $(docker inspect -f '{{.State.Running}}' $container_name) != "true" ]]; do
+    echo "Waiting for container $container_name to be up..."
+    sleep 1
+done
+
 echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
 
-docker exec -it $container_name bash --login
+docker exec -it $container_name bash --login -c "while [ ! -f /ros2_ws/install/setup.bash ]; do sleep 1; done; source /ros2_ws/install/setup.bash; exec bash"

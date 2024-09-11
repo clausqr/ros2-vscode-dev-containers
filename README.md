@@ -179,9 +179,17 @@ Usage:
 Options:
 
 - `--name <container_name>`: Specify a custom name for the Docker container. If not provided, a default name from setup.env is used.
+- `--devaice <device>`: Specify a device to mount in the container. This option can be used multiple times to mount multiple devices.
 - `--help`: Display usage information and exit.
 
-#### 7. `stop` - Stop a running container
+Example: Run container with custom name and mount two devices, `/dev/ttyUSB17` (mapped to `/dev/ttyUSB0` inside the container) and `/dev/ttyACM0`:
+
+```bash
+./rr run --name my_container --device /dev/ttyUSB17:/dev/ttyUSB0 --device /dev/ttyACM0
+```
+
+
+#### 7. `stop` - Stop a running container.
 
 Description:
 Stop a running container with the specified name.
