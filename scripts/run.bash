@@ -19,6 +19,9 @@ source setup.env
 # Default value
 default_container_name=$IMAGE_NAME
 
+# Flags to pass to the docker run command, to be populated based on the environment
+flags=""
+
 # Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
     case $1 in
@@ -29,6 +32,15 @@ while [[ "$#" -gt 0 ]]; do
     --help)
         echo "Usage: $0 [--name <container_name>]"
         exit 0
+        ;;
+    --device)
+        shift
+        while [[ "$#" -gt 0 ]]; do
+            device="$1"
+            flags+=" --device=$device"
+            shift
+        done
+        echo "Collected flags: ${flags}"
         ;;
     *)
         echo "Unknown parameter passed: $1"
@@ -43,29 +55,6 @@ container_name="${container_name:-$default_container_name}"
 echo "Running image $IMAGE_NAME using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
 echo "Container will be named $container_name"
 echo
-
-flags=""
-
-# Check for serial port availability
-for n in {0..9}; do
-    if [ -e "/dev/ttyUSB$n" ]; then
-        echo "/dev/ttyUSB$n is available"
-        flags+=" --device=/dev/ttyUSB$n"
-        break
-    else
-        echo "/dev/ttyUSB$n is not available"
-    fi
-done
-for n in {0..9}; do
-    if [ -e "/dev/ttyACM$n" ]; then
-        echo "/dev/ttyACM$n is available"
-        flags+=" --device=/dev/ttyACM$n:/dev/ttyACM0 --group-add dialout"
-        break
-    else
-        echo "/dev/ttyACM$n is not available"
-    fi
-done
-echo "Collected flags: ${flags}"
 
 # Check for display availability
 if [ -z "$DISPLAY" ]; then
