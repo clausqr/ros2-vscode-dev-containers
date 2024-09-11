@@ -12,7 +12,15 @@
 # OPTIONS:
 # --name <container_name>  Specify a custom name for the Docker container. If not
 #                          provided, a default name from the setup.env file is used.
+# --device <device>        Specify a device to be passed to the Docker container.
 # --help                   Display usage information and exit.
+#
+# EXAMPLES:
+#   
+#   Run with mapped device ttyUSB17 on the host to ttyUSB0 in the container:
+#    ./rr run --device /dev/ttyUSB17:/dev/ttyUSB0
+#   Run with custom container name:
+#    ./rr run --name my_container
 
 source setup.env
 
