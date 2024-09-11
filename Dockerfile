@@ -64,7 +64,6 @@ ENV SHELL=/bin/bash
 # Set up the ROS 2 environment
 USER ${USERNAME}
 RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
-# RUN echo "while [ ! -f /ros2_ws/install/setup.bash ]; do sleep 1; done; source /ros2_ws/install/setup.bash" >> ${HOME}/.bashrc
 
 WORKDIR /ros2_ws
 
