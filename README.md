@@ -15,18 +15,23 @@ Sources:
 
 ### Alternative 1: Manual clone and fresh *start*
 
-1. Clone this repository to your local machine and change the name to your desired project name.
+1. Clone this repository to your local machine and change the name to your desired project name
+
 ```bash
 git clone git@github.com:clausqr/ros2-vscode-container-dev.git my_project_name
 ```
 
-2. Break the link to this repo and get rid of the images of `readme.MD`.
+1. Break the link to this repo and get rid of the images of `readme.MD`
+
 ```bash
 cd my_project_name
 rm -rf .git && git init
 rm readme.MD && touch readme.MD
 rm img/*.png
 ```
+
+### Alternative 2:
+
 ### Alternative 2: 
 
 Alternatively, if you are using github, you can select "Use this template"
@@ -34,7 +39,13 @@ Alternatively, if you are using github, you can select "Use this template"
 ![github-template-button](img/github-template.png)
 
 and select "Create new repository" and fill in the details and start working on your new repo.
-
+Then after cloning your new repo you only need to get rid of this readme and its imgs:
+```bash
+git clone <your_new_repo_url> my_project_name
+cd my_project_name
+rm README.md && touch README.md
+rm img/*.png
+```
 
 ## Setting up Container Dev
 
@@ -108,7 +119,9 @@ To enable SSH access into the container, you can use the `SSH_ENABLED` and `SSH_
 - `SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
 - `SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
 
-When SSH is enabled, you can connect to the container using the following command:
+When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`. 
+
+Connect using the following command:
 
 ```bash
 ssh -l <username> -p <port> <container_ip>
@@ -131,40 +144,43 @@ If you are running multiple instances, you can run each with a custom `instance_
 
 
 
-#### 1. `build` - Build the Docker image.
+#### 1. `build` - Build the Docker image
+
 ```bash
 ./rr build
 ```
 
 Build a Docker image with the username, user ID, group ID, image name, and ROS distro specified in the setup.env file.
 
+#### 2. `cleanup` - Clean up the `ros2_ws` artifacts
 
-#### 2. `cleanup` - Clean up the `ros2_ws` artifacts.
 ```bash
 ./rr cleanup
 ```
+
 Clean up the ros2_ws artifacts, specifically the build, install, and log directories.
 
+#### 3. `create_devcontainer` - Create a devcontainer.json file
 
-#### 3. `create_devcontainer` - Create a devcontainer.json file.
 ```bash
 ./rr create_devcontainer
 ```
 
 Create a devcontainer.json file from the devcontainer-template.json template by replacing placeholders with values from setup.env.
 
-4. `join` - Join a running in the container.
-   
+#### 4. `join` - Join a running in the container
+
 ```bash
 ./rr join [--name <container_name>]
 ```
+
 Join a running container using the specified container name, username, user ID, and group ID from setup.env.
 
 Options:
-- `--name <container_name>`: Specify the container name to join. If not provided, the default container name from setup.env is used.
-- 
 
-#### 5. `kill` - Kill the running container.
+- `--name <container_name>`: Specify the container name to join. If not provided, the default container name from setup.env is used.
+
+#### 5. `kill` - Kill the running container
 
 Description: If the container is running, this script will kill it.
 Usage:
@@ -174,17 +190,17 @@ Usage:
 ```
 
 Options:
+
 - `--name <container_name>`: Specify the container name to kill. If not provided, the default container name from setup.env is used.
 
-
-#### 6. `run` - Run a Docker container.
+#### 6. `run` - Run a Docker container
 
 Description:
 Run a Docker container with configurations defined in setup.env. This script checks for necessary arguments and allows optional customization of the container name.
 Usage:
 
-```
-rr run [--name <container_name>]
+```bash
+./rr run [--name <container_name>]
 ```
 
 Options:
@@ -207,16 +223,14 @@ Stop a running container with the specified name.
 Usage:
 
 ```bash
-./rr stop [--name <container_name>]
+
 ```
 
 Options:
 
 - `--name <container_name>`: Specify the container name to stop. If not provided, the default container name from setup.env is used.
 
-
-
-## To Do and WIP:
+## To Do and WIP
 
 - [x] Squash previous WIP items.
 - [x] Offload config to separate `setup.env` file.
