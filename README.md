@@ -119,7 +119,9 @@ To enable SSH access into the container, you can use the `SSH_ENABLED` and `SSH_
 - `SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
 - `SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
 
-When SSH is enabled, you can connect to the container using the following command:
+When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`. 
+
+Connect using the following command:
 
 ```bash
 ssh -l <username> -p <port> <container_ip>
