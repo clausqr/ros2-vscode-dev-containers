@@ -108,6 +108,31 @@ Commands:
 user@host:/ros2_ws/src$
 ```
 
+### Remote Development Extension Pack
+
+For an enhanced development experience, consider installing the [Remote Development extension pack](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack) for VS Code. This extension pack allows you to connect to the container and see all packages and libraries corresponding to the environment as seen by the code to be run there. Main way to connect is via ssh:
+
+### SSH Access
+
+To enable SSH access into the container, you can use the `SSH_ENABLED` and `SSH_PORT` options in the `setup.env` file.
+
+- `SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
+- `SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
+
+When SSH is enabled, you can connect to the container using the following command:
+
+```bash
+ssh -l <username> -p <port> <container_ip>
+```
+
+Replace `<username>` with the value of `USERNAME` from `setup.env`, `<port>` with the value of `SSH_PORT`, and `<container_ip>` with the IP address of the container.
+
+Example:
+
+```bash
+ssh -l user -p 20022 192.168.1.100
+```
+
 ## Alternative: build and run from terminal
 
 Some convenience scripts are provided, they use a single `setup.env` file to configure the user and image names. 

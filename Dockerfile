@@ -1,7 +1,6 @@
 ARG ROS_DISTRO=none
-FROM osrf/ros:${ROS_DISTRO}-desktop
-ARG ROS_DISTRO=none
-FROM osrf/ros:${ROS_DISTRO}-desktop
+ARG SSH_ENABLED=0
+FROM osrf/ros:${ROS_DISTRO}-desktop AS base
 ARG ROS_DISTRO=none
 ARG USERNAME=USERNAME
 ARG USER_UID=USER_UID
@@ -66,4 +65,25 @@ RUN echo source /opt/ros/${ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
 
 WORKDIR /ros2_ws
 
+FROM base AS ssh-branch-0
+
 CMD ["/bin/bash"]
+
+FROM base AS ssh-branch-1
+ARG SSH_PORT
+
+# Set up ssh access
+USER root
+RUN echo Port ${SSH_PORT} >> /etc/ssh/sshd_config
+
+# Create /run/sshd directory and set permissions
+RUN mkdir -p /run/sshd && chmod 0755 /run/sshd
+USER ${USERNAME}
+
+CMD sudo service ssh start \
+    && echo "SSH access enabled, connect with:" \
+    && echo "ssh -l $(whoami) -p $(tail -n 1 /etc/ssh/sshd_config | cut -d ' ' -f 2) $(hostname -I | cut -d ' ' -f 1)" \
+    && /bin/bash
+
+FROM ssh-branch-${SSH_ENABLED} AS final
+RUN echo "Built image with SSH_ENABLED=${SSH_ENABLED}" 
