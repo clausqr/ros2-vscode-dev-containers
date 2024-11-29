@@ -16,7 +16,7 @@
 # --help                   Display usage information and exit.
 #
 # EXAMPLES:
-#   
+#
 #   Run with mapped device ttyUSB17 on the host to ttyUSB0 in the container:
 #    ./rr run --device /dev/ttyUSB17:/dev/ttyUSB0
 #   Run with custom container name:
@@ -83,11 +83,22 @@ fi
 
 echo "Collected flags: ${flags}"
 
+# Conditionally add the mount for the SSH folder
+if [ "$SSH_ENABLED" -eq 1 ]; then
+    echo "SSH access is enabled for this container."
+    echo "Mounting ~/.ssh folder, connect with the same credentials as the host."
+    ssh_mount="--mount type=bind,source=${HOME}/.ssh,destination=/home/${USERNAME}/.ssh,readonly"
+else
+    echo "SSH access is not enabled for this container."
+    ssh_mount=""
+fi
+
 docker run -it \
     $flags \
     --rm \
     --net=host \
     --user $USER_UID:$USER_GID \
     -v $(pwd)/ros2_ws:/ros2_ws \
+    $ssh_mount \
     --name $container_name \
     $IMAGE_NAME
