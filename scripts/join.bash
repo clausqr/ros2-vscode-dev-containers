@@ -35,4 +35,4 @@ done
 
 echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
 
-docker exec -it $container_name bash --login -c "while [ ! -f /ros2_ws/install/setup.bash ]; do sleep 1; done; source /ros2_ws/install/setup.bash; exec bash"
+docker exec -it $container_name bash --login -c "[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash; exec bash"
