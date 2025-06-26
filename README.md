@@ -142,7 +142,13 @@ If you are running multiple instances, you can run each with a custom `instance_
 
 ### Available Scripts
 
+All scripts can be executed using the `rr` wrapper script for convenience:
 
+```bash
+./rr <script_name> [args]
+```
+
+For example: `./rr run --name my_container`
 
 #### 1. `build` - Build the Docker image
 
@@ -152,7 +158,15 @@ If you are running multiple instances, you can run each with a custom `instance_
 
 Build a Docker image with the username, user ID, group ID, image name, and ROS distro specified in the setup.env file.
 
-#### 2. `cleanup` - Clean up the `ros2_ws` artifacts
+#### 2. `forcebuild` - Force build the Docker image (no cache)
+
+```bash
+./rr forcebuild
+```
+
+Force build a Docker image with the `--no-cache` flag, useful when you need to rebuild from scratch.
+
+#### 3. `cleanup` - Clean up the `ros2_ws` artifacts
 
 ```bash
 ./rr cleanup
@@ -160,7 +174,7 @@ Build a Docker image with the username, user ID, group ID, image name, and ROS d
 
 Clean up the ros2_ws artifacts, specifically the build, install, and log directories.
 
-#### 3. `create_devcontainer` - Create a devcontainer.json file
+#### 4. `create_devcontainer` - Create a devcontainer.json file
 
 ```bash
 ./rr create_devcontainer
@@ -168,73 +182,124 @@ Clean up the ros2_ws artifacts, specifically the build, install, and log directo
 
 Create a devcontainer.json file from the devcontainer-template.json template by replacing placeholders with values from setup.env.
 
-#### 4. `join` - Join a running in the container
+#### 5. `join` - Join a running container
 
 ```bash
 ./rr join [--name <container_name>]
 ```
 
-Join a running container using the specified container name, username, user ID, and group ID from setup.env.
+Join a running container using the specified container name, username, user ID, and group ID from setup.env. The script waits for the container to be running and for the ROS 2 setup to be complete before joining.
 
 Options:
 
 - `--name <container_name>`: Specify the container name to join. If not provided, the default container name from setup.env is used.
 
-#### 5. `kill` - Kill the running container
+#### 6. `kill` - Kill the running container
 
 Description: If the container is running, this script will kill it.
 Usage:
 
 ```bash
-./rr kill.bash [--name <container_name>]
+./rr kill [--name <container_name>]
 ```
 
 Options:
 
 - `--name <container_name>`: Specify the container name to kill. If not provided, the default container name from setup.env is used.
 
-#### 6. `run` - Run a Docker container
+#### 7. `run` - Run a Docker container
 
 Description:
-Run a Docker container with configurations defined in setup.env. This script checks for necessary arguments and allows optional customization of the container name.
+Run a Docker container with configurations defined in setup.env. This script automatically detects and configures:
+- Display availability for GUI applications
+- Joystick availability (`/dev/input/js0`)
+- NVIDIA GPU availability
+- SSH access (if enabled in setup.env)
+
 Usage:
 
 ```bash
-./rr run [--name <container_name>]
+./rr run [--name <container_name>] [--device <device>]
 ```
 
 Options:
 
 - `--name <container_name>`: Specify a custom name for the Docker container. If not provided, a default name from setup.env is used.
-- `--devaice <device>`: Specify a device to mount in the container. This option can be used multiple times to mount multiple devices.
+- `--device <device>`: Specify a device to mount in the container. This option can be used multiple times to mount multiple devices.
 - `--help`: Display usage information and exit.
 
-Example: Run container with custom name and mount two devices, `/dev/ttyUSB17` (mapped to `/dev/ttyUSB0` inside the container) and `/dev/ttyACM0`:
+Examples:
+
+Run container with custom name and mount two devices, `/dev/ttyUSB17` (mapped to `/dev/ttyUSB0` inside the container) and `/dev/ttyACM0`:
 
 ```bash
 ./rr run --name my_container --device /dev/ttyUSB17:/dev/ttyUSB0 --device /dev/ttyACM0
 ```
 
+Run with joystick support (automatically detected if `/dev/input/js0` exists):
 
-#### 7. `stop` - Stop a running container.
+```bash
+./rr run --name my_robot_container
+```
+
+#### 8. `stop` - Stop a running container
 
 Description:
 Stop a running container with the specified name.
 Usage:
 
 ```bash
-
+./rr stop [--name <container_name>]
 ```
 
 Options:
 
 - `--name <container_name>`: Specify the container name to stop. If not provided, the default container name from setup.env is used.
 
+### Automatic Device Detection
+
+The `run` script now includes automatic detection and configuration for:
+
+- **Display**: Automatically mounts X11 display, DRI devices, and shared memory for GUI applications
+- **Joystick**: Automatically mounts `/dev/input/js0` if available for joystick support in ROS 2
+- **NVIDIA GPU**: Automatically enables GPU support if `nvidia-smi` is available
+- **SSH**: Mounts SSH keys if SSH access is enabled in `setup.env`
+
+### Configuration File
+
+The `setup.env` file contains all configuration options:
+
+```bash
+# Group ID of the user on the host machine
+USER_GID=$(id -g $(whoami))
+
+# User ID of the user on the host machine
+USER_UID=$(id -u)
+
+# Username to be used inside the container
+USERNAME=user
+
+# Name of the Docker image to be built
+IMAGE_NAME=devcontainer_image
+
+# ROS 2 distribution to be used (e.g., foxy, jazzy, etc.)
+ROS_DISTRO=jazzy
+
+# Enable SSH access to the container (0 = disabled, 1 = enabled)
+SSH_ENABLED=0
+
+# Port to use for SSH access if SSH is enabled
+SSH_PORT=20022
+```
+
 ## To Do and WIP
 
 - [x] Squash previous WIP items.
 - [x] Offload config to separate `setup.env` file.
 - [x] Allow multiple instances.
-- [ ] Check/automate GPU handling.
-- [ ] Check/automate/allow mounting devices (i.e. `/dev/ttyUSB0`).
+- [x] Check/automate GPU handling.
+- [x] Check/automate/allow mounting devices (i.e. `/dev/ttyUSB0`).
+- [x] Add joystick support with automatic detection.
+- [x] Improve script documentation and add help options.
+- [x] Add `rr` wrapper script for easier script execution.
 - [ ] Integration with github codespaces (get rid of mounts for X11 and GPUs).

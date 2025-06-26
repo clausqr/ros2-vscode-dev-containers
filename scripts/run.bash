@@ -73,6 +73,14 @@ else
 fi
 echo "Collected flags: ${flags}"
 
+# Check for joystick availability
+if [ -e /dev/input/js0 ]; then
+    flags+=" --device=/dev/input/js0"
+    echo "Joystick available"
+else
+    echo "No joystick available"
+fi
+
 # Check for NVIDIA GPU availability
 if which nvidia-smi &>/dev/null; then
     echo "NVIDIA GPU available"
@@ -84,13 +92,13 @@ fi
 echo "Collected flags: ${flags}"
 
 # Conditionally add the mount for the SSH folder
+ssh_mount=""
 if [ "$SSH_ENABLED" -eq 1 ]; then
     echo "SSH access is enabled for this container."
     echo "Mounting ~/.ssh folder, connect with the same credentials as the host."
     ssh_mount="--mount type=bind,source=${HOME}/.ssh,destination=/home/${USERNAME}/.ssh,readonly"
 else
     echo "SSH access is not enabled for this container."
-    ssh_mount=""
 fi
 
 docker run -it \
