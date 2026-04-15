@@ -17,7 +17,7 @@
 source setup.env
 
 # Default value
-default_container_name=$IMAGE_NAME
+default_container_name=$RR_IMAGE_NAME
 
 # Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
@@ -40,7 +40,7 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Stopping ${container_name}...
+echo "Stopping ${container_name}..."
 
 docker stop ${container_name}
 echo "${container_name} stopped OK"

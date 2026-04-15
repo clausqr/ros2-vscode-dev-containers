@@ -18,18 +18,18 @@ display_help() {
 source setup.env
 
 # Default values from setup.env
-USERNAME_DEFAULT=$USERNAME
-USER_UID_DEFAULT=$USER_UID
-USER_GID_DEFAULT=$USER_GID
-IMAGE_NAME_DEFAULT=$IMAGE_NAME
+RR_USERNAME_DEFAULT=$RR_USERNAME
+RR_USER_UID_DEFAULT=$RR_USER_UID
+RR_USER_GID_DEFAULT=$RR_USER_GID
+RR_IMAGE_NAME_DEFAULT=$RR_IMAGE_NAME
 
 # Parse command line arguments
 while [[ "$#" -gt 0 ]]; do
     case $1 in
-        -u|--username) USERNAME="$2"; shift ;;
-        -i|--user-uid) USER_UID="$2"; shift ;;
-        -g|--user-gid) USER_GID="$2"; shift ;;
-        -n|--image-name) IMAGE_NAME="$2"; shift ;;
+        -u|--username) RR_USERNAME="$2"; shift ;;
+        -i|--user-uid) RR_USER_UID="$2"; shift ;;
+        -g|--user-gid) RR_USER_GID="$2"; shift ;;
+        -n|--image-name) RR_IMAGE_NAME="$2"; shift ;;
         -h|--help) display_help ;;
         --) shift; break ;;
         -*) echo "Unknown option: $1" >&2; display_help ;;
@@ -39,18 +39,18 @@ while [[ "$#" -gt 0 ]]; do
 done
 
 # Use defaults if not set via command line
-USERNAME=${USERNAME:-$USERNAME_DEFAULT}
-USER_UID=${USER_UID:-$USER_UID_DEFAULT}
-USER_GID=${USER_GID:-$USER_GID_DEFAULT}
-IMAGE_NAME=${IMAGE_NAME:-$IMAGE_NAME_DEFAULT}
+RR_USERNAME=${RR_USERNAME:-$RR_USERNAME_DEFAULT}
+RR_USER_UID=${RR_USER_UID:-$RR_USER_UID_DEFAULT}
+RR_USER_GID=${RR_USER_GID:-$RR_USER_GID_DEFAULT}
+RR_IMAGE_NAME=${RR_IMAGE_NAME:-$RR_IMAGE_NAME_DEFAULT}
 
 # Read the JSON template
 json_template=$(cat .devcontainer/devcontainer-template.json)
 
 # Replace the placeholders with the actual values
-json_template=${json_template//'${templateOption:containerUser}'/$USERNAME}
-json_template=${json_template//'${templateOption:containerUid}'/$USER_UID}
-json_template=${json_template//'${templateOption:containerGid}'/$USER_GID}
+json_template=${json_template//'${templateOption:containerUser}'/$RR_USERNAME}
+json_template=${json_template//'${templateOption:containerUid}'/$RR_USER_UID}
+json_template=${json_template//'${templateOption:containerGid}'/$RR_USER_GID}
 
 # Output the modified JSON to a new file
 echo "$json_template" > .devcontainer/devcontainer.json
