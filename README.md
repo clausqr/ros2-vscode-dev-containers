@@ -114,10 +114,10 @@ For an enhanced development experience, consider installing the [Remote Developm
 
 ### SSH Access
 
-To enable SSH access into the container, you can use the `SSH_ENABLED` and `SSH_PORT` options in the `setup.env` file.
+To enable SSH access into the container, you can use the `RR_SSH_ENABLED` and `RR_SSH_PORT` options in the `setup.env` file.
 
-- `SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
-- `SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
+- `RR_SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
+- `RR_SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
 
 When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`. 
 
@@ -127,7 +127,7 @@ Connect using the following command:
 ssh -l <username> -p <port> <container_ip>
 ```
 
-Replace `<username>` with the value of `USERNAME` from `setup.env`, `<port>` with the value of `SSH_PORT`, and `<container_ip>` with the IP address of the container.
+Replace `<username>` with the value of `RR_USERNAME` from `setup.env`, `<port>` with the value of `RR_SSH_PORT`, and `<container_ip>` with the IP address of the container.
 
 Example:
 
@@ -271,25 +271,25 @@ The `setup.env` file contains all configuration options:
 
 ```bash
 # Group ID of the user on the host machine
-USER_GID=$(id -g $(whoami))
+RR_USER_GID=$(id -g $(whoami))
 
 # User ID of the user on the host machine
-USER_UID=$(id -u)
+RR_USER_UID=$(id -u)
 
 # Username to be used inside the container
-USERNAME=user
+RR_USERNAME=user
 
 # Name of the Docker image to be built
-IMAGE_NAME=devcontainer_image
+RR_IMAGE_NAME=devcontainer_image
 
 # ROS 2 distribution to be used (e.g., foxy, jazzy, etc.)
-ROS_DISTRO=jazzy
+RR_ROS_DISTRO=jazzy
 
 # Enable SSH access to the container (0 = disabled, 1 = enabled)
-SSH_ENABLED=0
+RR_SSH_ENABLED=0
 
 # Port to use for SSH access if SSH is enabled
-SSH_PORT=20022
+RR_SSH_PORT=20022
 ```
 
 ## To Do and WIP

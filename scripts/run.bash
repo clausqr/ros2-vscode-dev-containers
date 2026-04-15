@@ -25,7 +25,7 @@
 source setup.env
 
 # Default value
-default_container_name=$IMAGE_NAME
+default_container_name=$RR_IMAGE_NAME
 
 # Flags to pass to the docker run command, to be populated based on the environment
 flags=""
@@ -60,7 +60,7 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Running image $IMAGE_NAME using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
+echo "Running image $RR_IMAGE_NAME using RR_USERNAME=$RR_USERNAME RR_USER_UID=$RR_USER_UID RR_USER_GID=$RR_USER_GID"
 echo "Container will be named $container_name"
 echo
 
@@ -93,20 +93,30 @@ echo "Collected flags: ${flags}"
 
 # Conditionally add the mount for the SSH folder
 ssh_mount=""
-if [ "$SSH_ENABLED" -eq 1 ]; then
+if [ "$RR_SSH_ENABLED" -eq 1 ]; then
     echo "SSH access is enabled for this container."
     echo "Mounting ~/.ssh folder, connect with the same credentials as the host."
-    ssh_mount="--mount type=bind,source=${HOME}/.ssh,destination=/home/${USERNAME}/.ssh,readonly"
+    ssh_mount="--mount type=bind,source=${HOME}/.ssh,destination=/home/${RR_USERNAME}/.ssh,readonly"
 else
     echo "SSH access is not enabled for this container."
+fi
+
+# Build the container startup command. SSH capability is always baked into the
+# image; we start the service here only when RR_SSH_ENABLED=1, so toggling SSH
+# no longer requires a rebuild.
+if [ "$RR_SSH_ENABLED" -eq 1 ]; then
+    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \$(tail -n 1 /etc/ssh/sshd_config | cut -d ' ' -f 2) \$(hostname -I | cut -d ' ' -f 1)\" && exec bash"
+else
+    startup_cmd="exec bash"
 fi
 
 docker run -it \
     $flags \
     --rm \
     --net=host \
-    --user $USER_UID:$USER_GID \
+    --user $RR_USER_UID:$RR_USER_GID \
     -v $(pwd)/ros2_ws:/ros2_ws \
     $ssh_mount \
     --name $container_name \
-    $IMAGE_NAME
+    $RR_IMAGE_NAME \
+    bash -c "$startup_cmd"
