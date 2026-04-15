@@ -6,9 +6,9 @@
     {
         "dockerfile": "../Dockerfile",
         "args": {
-            "USER_UID": "${templateOption:containerUid}",
-            "USER_GID": "${templateOption:containerGid}",
-            "USERNAME": "${templateOption:containerUser}"
+            "RR_USER_UID": "${templateOption:containerUid}",
+            "RR_USER_GID": "${templateOption:containerGid}",
+            "RR_USERNAME": "${templateOption:containerUser}"
         }
     },
     "workspaceFolder": "/ros2_ws",

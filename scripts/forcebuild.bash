@@ -3,17 +3,16 @@
 
 source setup.env
 
-echo "Building image $IMAGE_NAME using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
-echo "Using ROS_DISTRO=$ROS_DISTRO"
-if [ "$SSH_ENABLED" = "true" ]; then
-    echo "SSH enabled on port SSH_PORT=$SSH_PORT"
+echo "Building image $RR_IMAGE_NAME using RR_USERNAME=$RR_USERNAME RR_USER_UID=$RR_USER_UID RR_USER_GID=$RR_USER_GID"
+echo "Using RR_ROS_DISTRO=$RR_ROS_DISTRO"
+if [ "$RR_SSH_ENABLED" = "1" ]; then
+    echo "SSH enabled on port RR_SSH_PORT=$RR_SSH_PORT"
 fi
 
 docker build --no-cache \
-    --build-arg="USER_UID=$USER_UID" \
-    --build-arg="USER_GID=$USER_GID" \
-    --build-arg="USERNAME=$USERNAME" \
-    --build-arg="ROS_DISTRO=$ROS_DISTRO" \
-    --build-arg="SSH_ENABLED=$SSH_ENABLED" \
-    --build-arg="SSH_PORT=$SSH_PORT" \
-    -t $IMAGE_NAME:latest .
+    --build-arg="RR_USER_UID=$RR_USER_UID" \
+    --build-arg="RR_USER_GID=$RR_USER_GID" \
+    --build-arg="RR_USERNAME=$RR_USERNAME" \
+    --build-arg="RR_ROS_DISTRO=$RR_ROS_DISTRO" \
+    --build-arg="RR_SSH_PORT=$RR_SSH_PORT" \
+    -t $RR_IMAGE_NAME:latest .

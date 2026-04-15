@@ -4,7 +4,7 @@
 source setup.env
 
 # Default value
-default_container_name=$IMAGE_NAME
+default_container_name=$RR_IMAGE_NAME
 
 # Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
@@ -33,6 +33,8 @@ while [[ $(docker inspect -f '{{.State.Running}}' $container_name) != "true" ]];
     sleep 1
 done
 
-echo "Joining running container $container_name using USERNAME=$USERNAME USER_UID=$USER_UID USER_GID=$USER_GID"
+echo "Joining running container $container_name using RR_USERNAME=$RR_USERNAME RR_USER_UID=$RR_USER_UID RR_USER_GID=$RR_USER_GID"
 
-docker exec -it $container_name bash --login -c "[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash; exec bash"
+# If the workspace ships an on_join.sh hook, source it before the interactive
+# shell so projects can set up env, aliases, etc. without editing this script.
+docker exec -it $container_name bash --login -c "[ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash; [ -f /ros2_ws/on_join.sh ] && source /ros2_ws/on_join.sh; exec bash"

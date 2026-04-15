@@ -12,7 +12,7 @@
 source setup.env
 
 # Default value
-default_container_name=$IMAGE_NAME
+default_container_name=$RR_IMAGE_NAME
 
 # Parse command line arguments, add your own arguments here
 while [[ "$#" -gt 0 ]]; do
