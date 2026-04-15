@@ -70,6 +70,23 @@ if [ -z "$DISPLAY" ]; then
 else
     flags+=" -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v /dev/dri:/dev/dri -v /dev/shm:/dev/shm"
     echo "Display available"
+
+    # Pass the X11 auth cookie into the container. On Wayland+Xwayland the
+    # cookie lives in $XAUTHORITY (e.g. /run/user/1000/.mutter-Xwaylandauth.*),
+    # not in ~/.Xauthority, so we mount whichever file actually has it. Without
+    # this, GUI apps inside the container fail with "Authorization required".
+    host_xauth=""
+    if [ -n "$XAUTHORITY" ] && [ -f "$XAUTHORITY" ]; then
+        host_xauth="$XAUTHORITY"
+    elif [ -f "$HOME/.Xauthority" ]; then
+        host_xauth="$HOME/.Xauthority"
+    fi
+    if [ -n "$host_xauth" ]; then
+        flags+=" -v $host_xauth:/tmp/.docker.xauth:ro -e XAUTHORITY=/tmp/.docker.xauth"
+        echo "Mounting X auth cookie from $host_xauth"
+    else
+        echo "Warning: no X authority file found; GUI apps may fail to connect to display"
+    fi
 fi
 echo "Collected flags: ${flags}"
 
@@ -81,12 +98,18 @@ else
     echo "No joystick available"
 fi
 
-# Check for NVIDIA GPU availability
-if which nvidia-smi &>/dev/null; then
-    echo "NVIDIA GPU available"
-    flags+=" --gpus=all"
+# NVIDIA GPU passthrough is opt-in. Adding --gpus=all unconditionally breaks on
+# hosts that have the driver but not nvidia-container-toolkit installed, so we
+# only enable it when explicitly requested in setup.env.
+if [ "${RR_GPU_ENABLED:-0}" -eq 1 ]; then
+    if which nvidia-smi &>/dev/null; then
+        echo "NVIDIA GPU available and enabled"
+        flags+=" --gpus=all"
+    else
+        echo "RR_GPU_ENABLED=1 but nvidia-smi not found; skipping --gpus=all"
+    fi
 else
-    echo "No NVIDIA GPU available"
+    echo "GPU disabled (RR_GPU_ENABLED=0)"
 fi
 
 echo "Collected flags: ${flags}"
@@ -95,19 +118,41 @@ echo "Collected flags: ${flags}"
 ssh_mount=""
 if [ "$RR_SSH_ENABLED" -eq 1 ]; then
     echo "SSH access is enabled for this container."
-    echo "Mounting ~/.ssh folder, connect with the same credentials as the host."
+    echo "Mounting ~/.ssh folder (readonly), connect with the same credentials as the host."
     ssh_mount="--mount type=bind,source=${HOME}/.ssh,destination=/home/${RR_USERNAME}/.ssh,readonly"
+    echo "Connect to the container with:"
+    echo "  ssh -p ${RR_SSH_PORT} ${RR_USERNAME}@$(hostname -I | cut -d ' ' -f 1)"
 else
     echo "SSH access is not enabled for this container."
 fi
 
+# Parse RR_VOLUMES (comma-separated host:container[:opts] entries) into mount
+# flags. Lets downstream projects add extra bind-mounts via setup.env without
+# patching this script.
+additional_volume_flags=""
+if [ -n "${RR_VOLUMES:-}" ]; then
+    IFS=',' read -ra _rr_volumes <<< "$RR_VOLUMES"
+    for volume in "${_rr_volumes[@]}"; do
+        if [ -n "$volume" ]; then
+            additional_volume_flags+=" -v $volume"
+        fi
+    done
+fi
+
 # Build the container startup command. SSH capability is always baked into the
 # image; we start the service here only when RR_SSH_ENABLED=1, so toggling SSH
-# no longer requires a rebuild.
+# no longer requires a rebuild. If the workspace contains an executable
+# /ros2_ws/on_run.sh, source it after starting SSH so downstream projects can
+# customise startup without editing this script.
+hook_cmd=""
+if [ -f "$(pwd)/ros2_ws/on_run.sh" ]; then
+    hook_cmd="source /ros2_ws/on_run.sh && "
+    echo "Will source /ros2_ws/on_run.sh on container start"
+fi
 if [ "$RR_SSH_ENABLED" -eq 1 ]; then
-    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \$(tail -n 1 /etc/ssh/sshd_config | cut -d ' ' -f 2) \$(hostname -I | cut -d ' ' -f 1)\" && exec bash"
+    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \$(tail -n 1 /etc/ssh/sshd_config | cut -d ' ' -f 2) \$(hostname -I | cut -d ' ' -f 1)\" && ${hook_cmd}exec bash"
 else
-    startup_cmd="exec bash"
+    startup_cmd="${hook_cmd}exec bash"
 fi
 
 docker run -it \
@@ -115,7 +160,10 @@ docker run -it \
     --rm \
     --net=host \
     --user $RR_USER_UID:$RR_USER_GID \
+    -e RR_SSH_ENABLED=$RR_SSH_ENABLED \
+    -e RR_SSH_PORT=$RR_SSH_PORT \
     -v $(pwd)/ros2_ws:/ros2_ws \
+    $additional_volume_flags \
     $ssh_mount \
     --name $container_name \
     $RR_IMAGE_NAME \
