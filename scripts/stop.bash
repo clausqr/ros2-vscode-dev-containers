@@ -40,7 +40,7 @@ done
 # Use the default value if no --name argument was passed
 container_name="${container_name:-$default_container_name}"
 
-echo "Stopping ${container_name}...
+echo "Stopping ${container_name}..."
 
 docker stop ${container_name}
 echo "${container_name} stopped OK"
