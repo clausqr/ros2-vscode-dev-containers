@@ -145,7 +145,7 @@ if [ -f "$(pwd)/ros2_ws/on_run.sh" ]; then
     echo "Will source /ros2_ws/on_run.sh on container start"
 fi
 if [ "$RR_SSH_ENABLED" -eq 1 ]; then
-    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \$(tail -n 1 /etc/ssh/sshd_config | cut -d ' ' -f 2) \$(hostname -I | cut -d ' ' -f 1)\" && ${hook_cmd}exec bash"
+    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \${RR_SSH_PORT} \$(hostname -I | cut -d ' ' -f 1)\" && ${hook_cmd}exec bash"
 else
     startup_cmd="${hook_cmd}exec bash"
 fi
