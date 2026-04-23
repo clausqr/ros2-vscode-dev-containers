@@ -42,13 +42,8 @@ while [[ "$#" -gt 0 ]]; do
         exit 0
         ;;
     --device)
-        shift
-        while [[ "$#" -gt 0 ]]; do
-            device="$1"
-            flags+=" --device=$device"
-            shift
-        done
-        echo "Collected flags: ${flags}"
+        flags+=" --device=$2"
+        shift 2
         ;;
     *)
         echo "Unknown parameter passed: $1"
