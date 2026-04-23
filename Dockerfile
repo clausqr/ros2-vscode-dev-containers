@@ -41,18 +41,41 @@ RUN useradd -m -u ${RR_USER_UID} -g ${RR_USER_GID} -s /bin/bash ${RR_USERNAME} \
     && echo "${RR_USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # # # # # # # # # # # # # # # # # # # # #
 
-# Python install
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y python3-pip
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y inetutils-tools net-tools ssh
+# Upgrade the base image (one-shot). Done on its own layer so theme layers
+# below can be rebuilt independently.
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set up the ROS 2 repository and install the packages listed in included ros2_packages.txt
+# Networking / SSH utilities used by the runtime scripts.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        inetutils-tools \
+        net-tools \
+        ssh \
+    && rm -rf /var/lib/apt/lists/*
+
+# Developer shell ergonomics. Kept separate from the networking and ROS
+# layers so adding a tool here doesn't rebuild the big ones.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        tmux \
+    && rm -rf /var/lib/apt/lists/*
+
+# Python tooling.
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        python3-pip \
+    && rm -rf /var/lib/apt/lists/*
+
+# ROS 2 packages from ros2_packages.txt. The osrf/ros:*-desktop base image
+# already configures /etc/apt/sources.list.d/ros2.sources with the signed
+# keyring, so we do not re-add the repo here.
 COPY ros2_packages.txt /tmp/ros2_packages.txt
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - \
-    && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list' \
-    && apt-get update \
-    &&xargs -a /tmp/ros2_packages.txt -I {} bash -c "apt-get install -y \$(echo {} | sed 's/\${RR_ROS_DISTRO}/$RR_ROS_DISTRO/g')" \
+RUN apt-get update \
+    && xargs -a /tmp/ros2_packages.txt -I {} bash -c "apt-get install -y --no-install-recommends \$(echo {} | sed 's/\${RR_ROS_DISTRO}/$RR_ROS_DISTRO/g')" \
     && rm -rf /var/lib/apt/lists/*
 
 
