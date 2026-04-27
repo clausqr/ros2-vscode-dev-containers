@@ -41,11 +41,19 @@ RUN useradd -m -u ${RR_USER_UID} -g ${RR_USER_GID} -s /bin/bash ${RR_USERNAME} \
     && echo "${RR_USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # # # # # # # # # # # # # # # # # # # # #
 
-# Python install
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y python3-pip
+# Retry wrapper for transient DNS / mirror failures during build.
+# Usage: apt_retry <apt-get args...>
+RUN printf '#!/bin/sh\nset -e\nfor i in 1 2 3 4 5; do\n  if "$@"; then exit 0; fi\n  echo "apt step failed (attempt $i), retrying in 5s..." >&2\n  sleep 5\ndone\nexit 1\n' > /usr/local/bin/apt_retry && chmod +x /usr/local/bin/apt_retry
 
-RUN apt update && apt install -y inetutils-tools net-tools ssh
+# Python install. universe is required for python3-pip on Ubuntu Jammy.
+RUN apt_retry apt-get update \
+    && apt_retry apt-get install -y software-properties-common \
+    && add-apt-repository universe \
+    && apt_retry apt-get update \
+    && apt_retry apt-get upgrade -y \
+    && apt_retry apt-get install -y python3-pip
+
+RUN apt_retry apt-get update && apt_retry apt-get install -y inetutils-tools net-tools ssh
 
 # Set up the ROS 2 repository and install the packages listed in included ros2_packages.txt
 COPY ros2_packages.txt /tmp/ros2_packages.txt
