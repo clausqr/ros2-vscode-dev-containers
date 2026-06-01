@@ -119,7 +119,11 @@ To enable SSH access into the container, you can use the `RR_SSH_ENABLED` and `R
 - `RR_SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
 - `RR_SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
 
-When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`. 
+When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`.
+
+With SSH enabled the container runs **detached**, with `sshd` as PID 1 (`docker run -d`), so its lifetime is the sshd lifetime — independent of the terminal that launched it, and startable from a script or service without a TTY. The workspace builds on first start (via `ros2_ws/on_run.sh`), so `sshd` may take a moment to start accepting connections; `./rr join` waits for this. Stop the container with `./rr stop`. With SSH disabled the container stays interactive (`docker run -it`, bash as PID 1) exactly as before.
+
+> ROS env over SSH: a non-interactive `ssh host 'cmd'` does not inherit PID 1's environment (PAM strips `docker -e` vars). The image sources ROS from `/etc/profile.d/ros.sh` above the non-interactive guard in `~/.bashrc` so login shells get it, and `on_run.sh` re-emits the DDS/RMW env into `/etc/profile.d/dds-env.sh` for the same reason. If you add your own env, follow that pattern.
 
 Connect using the following command:
 
