@@ -42,10 +42,5 @@ container_name="${container_name:-$default_container_name}"
 
 echo "Stopping ${container_name}..."
 
-if docker stop "${container_name}"; then
-    echo "${container_name} stopped OK"
-else
-    status=$?
-    echo "Failed to stop ${container_name} (docker stop exit $status)" >&2
-    exit $status
-fi
+docker stop ${container_name}
+echo "${container_name} stopped OK"

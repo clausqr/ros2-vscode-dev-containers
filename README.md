@@ -119,11 +119,7 @@ To enable SSH access into the container, you can use the `RR_SSH_ENABLED` and `R
 - `RR_SSH_ENABLED`: Set this to `1` to enable SSH access, or `0` to disable it.
 - `RR_SSH_PORT`: Specify the port to use for SSH access. The default is `20022`.
 
-When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`.
-
-With SSH enabled the container runs **detached**, with `sshd` as PID 1 (`docker run -d`), so its lifetime is the sshd lifetime — independent of the terminal that launched it, and startable from a script or service without a TTY. The workspace builds on first start (via `ros2_ws/on_run.sh`), so `sshd` may take a moment to start accepting connections; `./rr join` waits for this. Stop the container with `./rr stop`. With SSH disabled the container stays interactive (`docker run -it`, bash as PID 1) exactly as before.
-
-> ROS env over SSH: a non-interactive `ssh host 'cmd'` does not inherit PID 1's environment (PAM strips `docker -e` vars). The image sources ROS from `/etc/profile.d/ros.sh` above the non-interactive guard in `~/.bashrc` so login shells get it, and `on_run.sh` re-emits the DDS/RMW env into `/etc/profile.d/dds-env.sh` for the same reason. If you add your own env, follow that pattern.
+When SSH is enabled, the script will mount the `~/.ssh` folder from the host to the container. You can connect to the container using the same credentials as for the host as the default network mode is `host`. 
 
 Connect using the following command:
 
@@ -138,32 +134,6 @@ Example:
 ```bash
 ssh -l user -p 20022 192.168.1.100
 ```
-
-### DDS / network containment (loopback)
-
-The container runs with `--net=host`, which means an uncontained DDS will
-multicast SPDP discovery (`239.255.0.1`) onto your real NICs and expose every
-ROS 2 topic to any node on the LAN sharing the same `ROS_DOMAIN_ID`. To prevent
-this leak, `./config` ships two loopback profiles that pin all RTPS traffic to
-`127.0.0.1`:
-
-- `config/cyclonedds_loopback.xml` — for `rmw_cyclonedds_cpp`
-- `config/fastdds_loopback.xml` — for `rmw_fastrtps_cpp` (the ROS 2 default)
-
-`run` bind-mounts `./config` into the container at `/ros2_ws/config` and sets
-`CYCLONEDDS_URI` / `FASTRTPS_DEFAULT_PROFILES_FILE` to point at them, so
-containment is active out of the box for whichever RMW you use. The relevant
-`setup.env` knobs:
-
-- `RR_CYCLONEDDS_URI`, `RR_FASTRTPS_PROFILE` — paths to the profiles. Blank both
-  to opt out of containment entirely.
-- `RR_ROS_LOCALHOST_ONLY` — kept `0` on purpose; the XML profile is the single
-  source of truth (see the comments in `setup.env` for why mixing the two
-  breaks discovery).
-
-> Note: with the SSH dev interface, `docker -e` env vars reach the container's
-> PID 1 and interactive shells but not PAM-spawned SSH login shells. If you work
-> over SSH, also export these from a login profile (e.g. `/etc/profile.d`).
 
 ## Alternative: build and run from terminal
 

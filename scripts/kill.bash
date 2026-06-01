@@ -37,11 +37,6 @@ container_name="${container_name:-$default_container_name}"
 
 echo "Killing ${container_name}..."
 
-if docker kill "${container_name}"; then
-    echo "${container_name} killed OK"
-else
-    status=$?
-    echo "Failed to kill ${container_name} (docker kill exit $status)" >&2
-    exit $status
-fi
+docker kill ${container_name}
+echo "${container_name} killed OK"
 
