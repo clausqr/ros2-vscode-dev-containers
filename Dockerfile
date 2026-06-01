@@ -59,9 +59,21 @@ RUN apt-get update \
 
 ENV SHELL=/bin/bash
 
-# Set up the ROS 2 environment
+# Set up the ROS 2 environment. Lives in /etc/profile.d for login shells, and
+# is pulled in from ~/.bashrc *above* the non-interactive guard so
+# `ssh user@host 'cmd'` also inherits ROS. (Debian-patched bash sources
+# ~/.bashrc for rshd/sshd-style non-interactive invocations and ignores
+# BASH_ENV in that mode, so prepending the source is the reliable path.)
+USER root
+RUN printf '%s\n' \
+    'if [ -z "$ROS_DISTRO" ]; then' \
+    '    source /opt/ros/'"${RR_ROS_DISTRO}"'/setup.bash' \
+    '    [ -f /ros2_ws/install/setup.bash ] && source /ros2_ws/install/setup.bash' \
+    'fi' \
+    > /etc/profile.d/ros.sh \
+    && chmod 644 /etc/profile.d/ros.sh
 USER ${RR_USERNAME}
-RUN echo source /opt/ros/${RR_ROS_DISTRO}/setup.bash >> ${HOME}/.bashrc
+RUN sed -i '1i source /etc/profile.d/ros.sh' ${HOME}/.bashrc
 
 WORKDIR /ros2_ws
 
