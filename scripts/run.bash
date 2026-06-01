@@ -155,14 +155,22 @@ else
     startup_cmd="${hook_cmd}exec bash"
 fi
 
+# --init injects tini as PID 1 to reap orphaned/zombie processes. Without it,
+# anything that gets reparented to PID 1 (detached launches, setsid) is never
+# reaped, and over a long session zombies can exhaust the host PID table.
 docker run -it \
     $flags \
     --rm \
+    --init \
     --net=host \
     --user $RR_USER_UID:$RR_USER_GID \
     -e RR_SSH_ENABLED=$RR_SSH_ENABLED \
     -e RR_SSH_PORT=$RR_SSH_PORT \
+    -e CYCLONEDDS_URI=${RR_CYCLONEDDS_URI} \
+    -e FASTRTPS_DEFAULT_PROFILES_FILE=${RR_FASTRTPS_PROFILE} \
+    -e ROS_LOCALHOST_ONLY=${RR_ROS_LOCALHOST_ONLY:-0} \
     -v $(pwd)/ros2_ws:/ros2_ws \
+    -v $(pwd)/config:/ros2_ws/config \
     $additional_volume_flags \
     $ssh_mount \
     --name $container_name \

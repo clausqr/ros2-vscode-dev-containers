@@ -47,12 +47,13 @@ RUN apt-get install -y python3-pip
 
 RUN apt update && apt install -y inetutils-tools net-tools ssh
 
-# Set up the ROS 2 repository and install the packages listed in included ros2_packages.txt
+# Install the ROS 2 packages listed in ros2_packages.txt. The osrf/ros base
+# image already ships /etc/apt/sources.list.d/ros2.sources with the keyring set
+# up, so the old manual ros.asc apt-key + ros2-latest.list was a duplicate that
+# triggered "configured multiple times" warnings (and apt-key is deprecated).
 COPY ros2_packages.txt /tmp/ros2_packages.txt
-RUN curl -sSL https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add - \
-    && sh -c 'echo "deb http://packages.ros.org/ros2/ubuntu $(lsb_release -cs) main" > /etc/apt/sources.list.d/ros2-latest.list' \
-    && apt-get update \
-    &&xargs -a /tmp/ros2_packages.txt -I {} bash -c "apt-get install -y \$(echo {} | sed 's/\${RR_ROS_DISTRO}/$RR_ROS_DISTRO/g')" \
+RUN apt-get update \
+    && xargs -a /tmp/ros2_packages.txt -I {} bash -c "apt-get install -y \$(echo {} | sed 's/\${RR_ROS_DISTRO}/$RR_ROS_DISTRO/g')" \
     && rm -rf /var/lib/apt/lists/*
 
 
