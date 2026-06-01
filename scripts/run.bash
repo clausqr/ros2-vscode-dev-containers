@@ -134,32 +134,55 @@ if [ -n "${RR_VOLUMES:-}" ]; then
     done
 fi
 
-# Build the container startup command. SSH capability is always baked into the
-# image; we start the service here only when RR_SSH_ENABLED=1, so toggling SSH
-# no longer requires a rebuild. If the workspace contains an executable
-# /ros2_ws/on_run.sh, source it after starting SSH so downstream projects can
-# customise startup without editing this script.
+# Build the container startup command. If the workspace contains an executable
+# /ros2_ws/on_run.sh, source it on start so downstream projects can customise
+# startup (build the workspace, materialise env, etc.) without editing this
+# script.
 hook_cmd=""
 if [ -f "$(pwd)/ros2_ws/on_run.sh" ]; then
     hook_cmd="source /ros2_ws/on_run.sh && "
     echo "Will source /ros2_ws/on_run.sh on container start"
 fi
+
+# When SSH is the dev interface, run detached with sshd in the foreground as
+# PID 1: the container's lifetime is then the sshd lifetime, independent of the
+# launching terminal, and no TTY is required (so it can be started from a
+# script/service). When SSH is disabled, fall back to an interactive bash,
+# which needs a TTY (-it).
 if [ "$RR_SSH_ENABLED" -eq 1 ]; then
-    startup_cmd="sudo service ssh start && echo 'SSH access enabled, connect with:' && echo \"ssh -l \$(whoami) -p \${RR_SSH_PORT} \$(hostname -I | cut -d ' ' -f 1)\" && ${hook_cmd}exec bash"
+    startup_cmd="${hook_cmd}exec sudo /usr/sbin/sshd -D -e"
+    run_mode="-d"
 else
     startup_cmd="${hook_cmd}exec bash"
+    run_mode="-it"
 fi
 
-docker run -it \
+# --init injects tini as PID 1 to reap orphaned/zombie processes. Without it,
+# anything that gets reparented to PID 1 (detached launches, setsid) is never
+# reaped, and over a long session zombies can exhaust the host PID table.
+docker run $run_mode \
     $flags \
     --rm \
+    --init \
     --net=host \
     --user $RR_USER_UID:$RR_USER_GID \
     -e RR_SSH_ENABLED=$RR_SSH_ENABLED \
     -e RR_SSH_PORT=$RR_SSH_PORT \
+    -e CYCLONEDDS_URI=${RR_CYCLONEDDS_URI} \
+    -e FASTRTPS_DEFAULT_PROFILES_FILE=${RR_FASTRTPS_PROFILE} \
+    -e ROS_LOCALHOST_ONLY=${RR_ROS_LOCALHOST_ONLY:-0} \
     -v $(pwd)/ros2_ws:/ros2_ws \
+    -v $(pwd)/config:/ros2_ws/config \
     $additional_volume_flags \
     $ssh_mount \
     --name $container_name \
     $RR_IMAGE_NAME \
     bash -c "$startup_cmd"
+
+if [ "$RR_SSH_ENABLED" -eq 1 ]; then
+    echo
+    echo "Container '$container_name' started in detached mode (sshd as PID 1)."
+    echo "The workspace builds on first start, so SSH may take a moment to accept."
+    echo "Connect with: ssh -p $RR_SSH_PORT $RR_USERNAME@$(hostname -I | cut -d ' ' -f 1)"
+    echo "Stop with:    ./rr stop   (or: docker stop $container_name)"
+fi

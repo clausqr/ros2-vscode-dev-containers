@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Cyclone DDS profile that forces all RTPS traffic onto loopback (127.0.0.1).
+  The cyclonedds analog of fastdds_loopback.xml. This matters because the
+  container runs with --net=host: without it, cyclonedds auto-selects a real
+  NIC (e.g. your wired LAN interface) and multicasts SPDP discovery
+  (239.255.0.1) onto the host network, exposing every topic to any ROS 2 node
+  on the segment sharing the same ROS_DOMAIN_ID. If everything your nodes need
+  lives in the one host netns, loopback-only is sufficient and leaks nothing.
+
+  Selected via CYCLONEDDS_URI (see scripts/run.bash / setup.env
+  RR_CYCLONEDDS_URI). Bind-mounted into the container at /ros2_ws/config.
+-->
+<CycloneDDS xmlns="https://cdds.io/config"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xsi:schemaLocation="https://cdds.io/config https://raw.githubusercontent.com/eclipse-cyclonedds/cyclonedds/master/etc/cyclonedds.xsd">
+  <Domain Id="any">
+    <General>
+      <!-- Bind RTPS to the loopback interface only. -->
+      <Interfaces>
+        <NetworkInterface name="lo" presence_required="false"/>
+      </Interfaces>
+      <!-- No multicast on any real NIC; discovery is unicast to localhost. -->
+      <AllowMulticast>false</AllowMulticast>
+      <EnableMulticastLoopback>true</EnableMulticastLoopback>
+    </General>
+    <Discovery>
+      <!-- Unicast discovery peer: this host only. -->
+      <Peers>
+        <Peer Address="localhost"/>
+      </Peers>
+      <ParticipantIndex>auto</ParticipantIndex>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

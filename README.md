@@ -135,6 +135,32 @@ Example:
 ssh -l user -p 20022 192.168.1.100
 ```
 
+### DDS / network containment (loopback)
+
+The container runs with `--net=host`, which means an uncontained DDS will
+multicast SPDP discovery (`239.255.0.1`) onto your real NICs and expose every
+ROS 2 topic to any node on the LAN sharing the same `ROS_DOMAIN_ID`. To prevent
+this leak, `./config` ships two loopback profiles that pin all RTPS traffic to
+`127.0.0.1`:
+
+- `config/cyclonedds_loopback.xml` — for `rmw_cyclonedds_cpp`
+- `config/fastdds_loopback.xml` — for `rmw_fastrtps_cpp` (the ROS 2 default)
+
+`run` bind-mounts `./config` into the container at `/ros2_ws/config` and sets
+`CYCLONEDDS_URI` / `FASTRTPS_DEFAULT_PROFILES_FILE` to point at them, so
+containment is active out of the box for whichever RMW you use. The relevant
+`setup.env` knobs:
+
+- `RR_CYCLONEDDS_URI`, `RR_FASTRTPS_PROFILE` — paths to the profiles. Blank both
+  to opt out of containment entirely.
+- `RR_ROS_LOCALHOST_ONLY` — kept `0` on purpose; the XML profile is the single
+  source of truth (see the comments in `setup.env` for why mixing the two
+  breaks discovery).
+
+> Note: with the SSH dev interface, `docker -e` env vars reach the container's
+> PID 1 and interactive shells but not PAM-spawned SSH login shells. If you work
+> over SSH, also export these from a login profile (e.g. `/etc/profile.d`).
+
 ## Alternative: build and run from terminal
 
 Some convenience scripts are provided, they use a single `setup.env` file to configure the user and image names. 
