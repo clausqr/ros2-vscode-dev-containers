@@ -107,6 +107,29 @@ else
     echo "GPU disabled (RR_GPU_ENABLED=0)"
 fi
 
+# USB passthrough is opt-in. When enabled, share the host's /dev/bus/usb so
+# libusb-based tools inside the container can see USB devices, and add the
+# host's plugdev group GID as a supplementary group so the container user (which
+# runs as the host UID:GID, see --user below) can open the device node. A host
+# udev rule must grant the device to the plugdev group. No --privileged needed;
+# hot-plug works because the whole /dev/bus/usb tree is shared.
+if [ "${RR_USB_ENABLED:-0}" -eq 1 ]; then
+    if [ -d /dev/bus/usb ]; then
+        flags+=" -v /dev/bus/usb:/dev/bus/usb"
+        plugdev_gid=$(getent group plugdev | cut -d: -f3)
+        if [ -n "$plugdev_gid" ]; then
+            flags+=" --group-add $plugdev_gid"
+            echo "USB passthrough enabled (/dev/bus/usb, --group-add plugdev=$plugdev_gid)"
+        else
+            echo "USB passthrough enabled (/dev/bus/usb); no host plugdev group found"
+        fi
+    else
+        echo "RR_USB_ENABLED=1 but /dev/bus/usb not found; skipping USB passthrough"
+    fi
+else
+    echo "USB disabled (RR_USB_ENABLED=0)"
+fi
+
 echo "Collected flags: ${flags}"
 
 # Conditionally add the mount for the SSH folder
@@ -168,6 +191,7 @@ docker run $run_mode \
     --user $RR_USER_UID:$RR_USER_GID \
     -e RR_SSH_ENABLED=$RR_SSH_ENABLED \
     -e RR_SSH_PORT=$RR_SSH_PORT \
+    -e ROS_DOMAIN_ID=${RR_ROS_DOMAIN_ID:-0} \
     -e CYCLONEDDS_URI=${RR_CYCLONEDDS_URI} \
     -e FASTRTPS_DEFAULT_PROFILES_FILE=${RR_FASTRTPS_PROFILE} \
     -e ROS_LOCALHOST_ONLY=${RR_ROS_LOCALHOST_ONLY:-0} \

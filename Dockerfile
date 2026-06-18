@@ -13,31 +13,26 @@ RUN echo "+ RR_USER_GID=${RR_USER_GID}"
 
 
 # # # # # # # # # # # # # # # # # # # #
-# Create the user with same GID and UID as the host:
+# Create the user with same GID and UID as the host.
+#
+# Under ROOTLESS Docker the host user maps to container UID 0, so a rootless
+# project sets RR_USER_UID/RR_USER_GID=0 (RR_USERNAME=root) for a writable
+# bind-mounted workspace. In that case the account already exists (root), so we
+# skip the create/delete dance and only wire up plugdev + passwordless sudo.
+# Also add the user to plugdev so it can open USB device nodes when
+# RR_USB_ENABLED=1 (run.bash injects the host plugdev GID at runtime).
 # # # # # # # # # # #  # # # # # # # #
-# Change the primary group of any user using the group to be deleted
-RUN if getent group ${RR_USER_GID}; then \
-    for user in $(getent passwd | awk -F: -v gid=${RR_USER_GID} '$4 == gid {print $1}'); do \
-    usermod -g users $user; \
-    done; \
-    fi
-
-# Delete existing user if it exists
-RUN if getent passwd ${RR_USER_UID}; then \
-    userdel -r $(getent passwd ${RR_USER_UID} | cut -d: -f1); \
-    fi
-
-# Delete existing group if it exists
-RUN if getent group ${RR_USER_GID}; then \
-    groupdel $(getent group ${RR_USER_GID} | cut -d: -f1); \
-    fi
-
-# Create the group with the specified GID
-RUN groupadd -g ${RR_USER_GID} ${RR_USERNAME}
-
-# Create the user with the specified UID and add to the sudo group
-RUN useradd -m -u ${RR_USER_UID} -g ${RR_USER_GID} -s /bin/bash ${RR_USERNAME} \
+RUN if [ "${RR_USER_UID}" != "0" ]; then \
+        if getent group ${RR_USER_GID}; then \
+            for u in $(getent passwd | awk -F: -v gid=${RR_USER_GID} '$4 == gid {print $1}'); do usermod -g users "$u"; done; \
+        fi; \
+        if getent passwd ${RR_USER_UID}; then userdel -r "$(getent passwd ${RR_USER_UID} | cut -d: -f1)"; fi; \
+        if getent group ${RR_USER_GID}; then groupdel "$(getent group ${RR_USER_GID} | cut -d: -f1)"; fi; \
+        groupadd -g ${RR_USER_GID} ${RR_USERNAME}; \
+        useradd -m -u ${RR_USER_UID} -g ${RR_USER_GID} -s /bin/bash ${RR_USERNAME}; \
+    fi \
     && usermod -aG sudo ${RR_USERNAME} \
+    && usermod -aG plugdev ${RR_USERNAME} \
     && echo "${RR_USERNAME} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 # # # # # # # # # # # # # # # # # # # # #
 
@@ -102,7 +97,7 @@ RUN printf '%s\n' \
     > /etc/profile.d/ros.sh \
     && chmod 644 /etc/profile.d/ros.sh
 USER ${RR_USERNAME}
-RUN sed -i '1i source /etc/profile.d/ros.sh' ${HOME}/.bashrc
+RUN touch ${HOME}/.bashrc && sed -i '1i source /etc/profile.d/ros.sh' ${HOME}/.bashrc
 
 WORKDIR /ros2_ws
 
