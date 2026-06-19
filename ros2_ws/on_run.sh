@@ -20,16 +20,17 @@ fi
 # from SSH-spawned login shells, so we re-emit the values the container was
 # started with into a system-scoped profile snippet. Only the vars that are
 # actually set get emitted, so this is a no-op when DDS containment is off.
-if [ -n "${FASTRTPS_DEFAULT_PROFILES_FILE:-}${RMW_IMPLEMENTATION:-}${CYCLONEDDS_URI:-}${ROS_LOCALHOST_ONLY:-}" ]; then
+if [ -n "${FASTRTPS_DEFAULT_PROFILES_FILE:-}${RMW_IMPLEMENTATION:-}${CYCLONEDDS_URI:-}${ROS_LOCALHOST_ONLY:-}${ROS_DOMAIN_ID:-}" ]; then
     sudo tee /etc/profile.d/dds-env.sh > /dev/null <<EOF
 # Written by /ros2_ws/on_run.sh at container start from docker -e values.
 ${FASTRTPS_DEFAULT_PROFILES_FILE:+export FASTRTPS_DEFAULT_PROFILES_FILE=$FASTRTPS_DEFAULT_PROFILES_FILE}
 ${CYCLONEDDS_URI:+export CYCLONEDDS_URI=$CYCLONEDDS_URI}
 ${ROS_LOCALHOST_ONLY:+export ROS_LOCALHOST_ONLY=$ROS_LOCALHOST_ONLY}
 ${RMW_IMPLEMENTATION:+export RMW_IMPLEMENTATION=$RMW_IMPLEMENTATION}
+${ROS_DOMAIN_ID:+export ROS_DOMAIN_ID=$ROS_DOMAIN_ID}
 EOF
     sudo chmod 644 /etc/profile.d/dds-env.sh
-    echo "Wrote /etc/profile.d/dds-env.sh (DDS profiles + RMW + localhost-only)"
+    echo "Wrote /etc/profile.d/dds-env.sh (DDS profiles + RMW + localhost-only + domain id)"
 
     if [ -w "$HOME/.bashrc" ] && ! grep -q '/etc/profile.d/dds-env.sh' "$HOME/.bashrc"; then
         sed -i '1i source /etc/profile.d/dds-env.sh' "$HOME/.bashrc"
